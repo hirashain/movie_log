@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:movie_log/screens/add_movie.dart';
 import 'package:provider/provider.dart';
 import 'models/movie.dart';
-import 'screens/records_screen.dart';
-import 'screens/watch_screen.dart';
-import 'screens/favorites_screen.dart';
+import 'screens/movies.dart';
 
 // flutter runすると、lib/main.dartのmain関数が最初に呼び出される
 void main() {
@@ -41,7 +40,7 @@ class MovieLogApp extends StatelessWidget {
     // こいつの子ウィジェットとしてScaffoldとかが登場する
     return MaterialApp(
       // タスクマネージャー等に表示されるアプリ名
-      title: 'MovieLog',
+      title: 'Movie Log',
       // アプリ全体のテーマ設定
       theme: ThemeData(primarySwatch: Colors.blue),
       // アプリの画面
@@ -63,44 +62,43 @@ class HomeScreen extends StatefulWidget {
 
 // ホーム画面の状態を管理するStateオブジェクト
 class HomeScreenState extends State<HomeScreen> {
-  // 選択中のタブのインデックス
-  int _selectedIndex = 0;
-
-  // タブとして切り替えたいウィジェットのリスト
-  // constを使用することで画面が再構築されるたびに新しいインスタンスを作成しないようにする
-  // _screens変数はリストとして扱い続けるため、finalで再代入を防ぐ
-  final List<Widget> _screens = [
-    const RecordsScreen(),
-    const WatchScreen(),
-    const FavoritesScreen(),
-  ];
-
-  // タブがタップされたときに呼び出したい関数
-  // タブのインデックスを受け取り、選択中のタブのインデックスを更新する
-  void _onTabTapped(int index) {
-    // setStateが呼び出されるとbuildが再実行される
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     // 画面全体の構造を定義するウィジェット
     return Scaffold(
-      appBar: AppBar(title: const Text('MovieLog')),
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        // これがないと選択中のタブがハイライトされない
-        currentIndex: _selectedIndex,
-        onTap: _onTabTapped,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.movie), label: 'Records'),
-          BottomNavigationBarItem(icon: Icon(Icons.visibility), label: 'Watch'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.favorite), label: 'Favorites'),
+      appBar: AppBar(
+        title: const Text('Movie Log'),
+        actions: [
+          // 映画追加
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MovieAddition(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.add),
+            tooltip: "Register",
+          ),
+          // お気に入りボタン
+          IconButton(
+            onPressed: () {
+              1 + 1;
+            },
+            icon: const Icon(Icons.favorite),
+          ),
+          // フィルターボタン
+          IconButton(
+            onPressed: () {
+              1 + 1;
+            },
+            icon: const Icon(Icons.filter_list),
+          ),
         ],
       ),
+      body: const Movies(),
     );
   }
 }
