@@ -71,9 +71,11 @@ class HomeScreenState extends State<HomeScreen> {
         actions: [
           // 映画追加
           IconButton(
+            // 押したときに呼ばれる関数
             onPressed: () {
               Navigator.push(
                 context,
+                // 遷移先の画面
                 MaterialPageRoute(
                   builder: (context) => const MovieAddition(),
                 ),
