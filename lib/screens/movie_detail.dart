@@ -13,9 +13,22 @@ class MovieDetail extends StatelessWidget {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              movie.title,
-              textScaler: const TextScaler.linear(4.0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    movie.title,
+                    textScaler: const TextScaler.linear(4.0),
+                  ),
+                ),
+                Icon(
+                  movie.isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: movie.isFavorite ? Colors.red : Colors.grey,
+                  size: 40.0,
+                ),
+                const SizedBox(width: 30),
+              ],
             ),
             // 画像表示
             movie.image != null

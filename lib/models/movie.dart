@@ -5,8 +5,13 @@ class Movie {
   final String title;
   final File? image;
   final String? comment;
+  final bool isFavorite;
 
-  Movie({required this.title, this.image, this.comment});
+  Movie(
+      {required this.title,
+      this.image,
+      this.comment,
+      required this.isFavorite});
 }
 
 class MovieProvider with ChangeNotifier {

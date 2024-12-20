@@ -18,6 +18,7 @@ class MovieAdditionState extends State<MovieAddition> {
   final TextEditingController _commentController = TextEditingController();
   File? _selectedImage;
   bool _isButtonEnabled = false;
+  bool _isFavorite = false;
 
   // ウィジェットが作成されたときに一回だけ呼び出される
   @override
@@ -61,8 +62,11 @@ class MovieAdditionState extends State<MovieAddition> {
       return;
     }
 
-    final newMovie =
-        Movie(title: title, image: _selectedImage, comment: comment);
+    final newMovie = Movie(
+        title: title,
+        image: _selectedImage,
+        comment: comment,
+        isFavorite: _isFavorite);
     context.read<MovieProvider>().addMovieList(newMovie);
   }
 
@@ -73,10 +77,27 @@ class MovieAdditionState extends State<MovieAddition> {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // タイトル
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Title'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _titleController,
+                    decoration: const InputDecoration(labelText: 'Title'),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(
+                    _isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: _isFavorite ? Colors.red : Colors.grey,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isFavorite = !_isFavorite;
+                    });
+                  },
+                ),
+              ],
             ),
             const SizedBox(height: 16),
 
