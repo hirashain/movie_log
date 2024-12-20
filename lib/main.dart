@@ -69,6 +69,7 @@ class HomeScreenState extends State<HomeScreen> {
     // 画面全体の構造を定義するウィジェット
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: const Text('Movie Log'),
         actions: [
           // 映画追加
