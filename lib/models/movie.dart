@@ -4,8 +4,9 @@ import 'dart:io';
 class Movie {
   final String title;
   final File? image;
+  final String? comment;
 
-  Movie({required this.title, this.image});
+  Movie({required this.title, this.image, this.comment});
 }
 
 class MovieProvider with ChangeNotifier {
@@ -14,7 +15,6 @@ class MovieProvider with ChangeNotifier {
   List<Movie> get movies => _movies;
 
   void addMovieList(Movie movie) {
-    print("Listennnnnnnnnnnnn");
     _movies.add(movie);
     notifyListeners();
   }

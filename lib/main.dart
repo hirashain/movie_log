@@ -96,7 +96,7 @@ class HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               1 + 1;
             },
-            icon: const Icon(Icons.filter_list),
+            icon: const Icon(Icons.settings),
           ),
         ],
       ),
