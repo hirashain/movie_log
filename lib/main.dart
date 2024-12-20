@@ -62,6 +62,8 @@ class HomeScreen extends StatefulWidget {
 
 // ホーム画面の状態を管理するStateオブジェクト
 class HomeScreenState extends State<HomeScreen> {
+  bool _onlyFavorite = false;
+
   @override
   Widget build(BuildContext context) {
     // 画面全体の構造を定義するウィジェット
@@ -87,20 +89,23 @@ class HomeScreenState extends State<HomeScreen> {
           // お気に入りボタン
           IconButton(
             onPressed: () {
-              1 + 1;
+              setState(() {
+                _onlyFavorite = !_onlyFavorite;
+              });
             },
-            icon: const Icon(Icons.favorite),
+            icon: Icon(
+              _onlyFavorite ? Icons.favorite : Icons.favorite_border,
+              color: _onlyFavorite ? Colors.red : Colors.grey,
+            ),
           ),
           // フィルターボタン
           IconButton(
-            onPressed: () {
-              1 + 1;
-            },
+            onPressed: () {},
             icon: const Icon(Icons.settings),
           ),
         ],
       ),
-      body: const Movies(),
+      body: Movies(onlyFavorite: _onlyFavorite),
     );
   }
 }

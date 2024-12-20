@@ -3,9 +3,15 @@ import 'package:provider/provider.dart';
 import '.././models/movie.dart';
 import 'movie_detail.dart';
 
-class Movies extends StatelessWidget {
-  const Movies({super.key});
+class Movies extends StatefulWidget {
+  final bool onlyFavorite;
+  const Movies({super.key, required this.onlyFavorite});
 
+  @override
+  MoviesState createState() => MoviesState();
+}
+
+class MoviesState extends State<Movies> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,9 +31,16 @@ class Movies extends StatelessWidget {
                   mainAxisSpacing: 0, // 行間のスペース
                   childAspectRatio: 0.75, // サムネイルのアスペクト比
                 ),
-                itemCount: movies.length,
+                itemCount: widget.onlyFavorite
+                    ? movies.where((movie) => movie.isFavorite).toList().length
+                    : movies.length,
                 itemBuilder: (context, index) {
-                  final movie = movies[index];
+                  final movie = widget.onlyFavorite
+                      ? movies
+                          .where((movie) => movie.isFavorite)
+                          .toList()[index]
+                      : movies[index];
+                  // final movie = movies[index];
                   return GestureDetector(
                       onTap: () {
                         // サムネイルタップ時に映画詳細を表示する処理
