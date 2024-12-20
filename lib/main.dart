@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:movie_log/screens/add_movie.dart';
+import 'package:movie_log/screens/settings.dart';
 import 'package:provider/provider.dart';
 import 'models/movie.dart';
 import 'screens/movies.dart';
@@ -99,9 +100,17 @@ class HomeScreenState extends State<HomeScreen> {
               color: _onlyFavorite ? Colors.red : Colors.grey,
             ),
           ),
-          // フィルターボタン
+          // 設定ボタン
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                // 遷移先の画面
+                MaterialPageRoute(
+                  builder: (context) => const Settings(),
+                ),
+              );
+            },
             icon: const Icon(Icons.settings),
           ),
         ],
