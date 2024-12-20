@@ -15,50 +15,54 @@ class MoviesState extends State<Movies> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer<MovieProvider>(builder: (context, movieProvider, child) {
-        final movies = movieProvider.movies;
-        return movies.isEmpty
-            ? const Center(
-                child: Text(
-                  "No Movie",
-                  textScaler: TextScaler.linear(5.0),
-                ),
-              )
-            : GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3, // 横に3列表示
-                  crossAxisSpacing: 0, // 列間のスペース
-                  mainAxisSpacing: 0, // 行間のスペース
-                  childAspectRatio: 0.75, // サムネイルのアスペクト比
-                ),
-                itemCount: widget.onlyFavorite
-                    ? movies.where((movie) => movie.isFavorite).toList().length
-                    : movies.length,
-                itemBuilder: (context, index) {
-                  final movie = widget.onlyFavorite
+      body: Consumer<MovieLogProvider>(
+        builder: (context, movieLogProvider, child) {
+          final movies = movieLogProvider.movies;
+          return movies.isEmpty
+              ? const Center(
+                  child: Text(
+                    "No Movie",
+                    textScaler: TextScaler.linear(5.0),
+                  ),
+                )
+              : GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: movieLogProvider.numColumns,
+                    crossAxisSpacing: 0, // 列間のスペース
+                    mainAxisSpacing: 0, // 行間のスペース
+                    childAspectRatio: 0.75, // サムネイルのアスペクト比
+                  ),
+                  itemCount: widget.onlyFavorite
                       ? movies
                           .where((movie) => movie.isFavorite)
-                          .toList()[index]
-                      : movies[index];
-                  // final movie = movies[index];
-                  return GestureDetector(
-                      onTap: () {
-                        // サムネイルタップ時に映画詳細を表示する処理
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    MovieDetail(movie: movie)));
-                      },
-                      child: movie.image != null
-                          ? Image.file(
-                              movie.image!,
-                              fit: BoxFit.cover,
-                            )
-                          : const Icon(Icons.image, size: 100));
-                },
-              );
-      }),
+                          .toList()
+                          .length
+                      : movies.length,
+                  itemBuilder: (context, index) {
+                    final movie = widget.onlyFavorite
+                        ? movies
+                            .where((movie) => movie.isFavorite)
+                            .toList()[index]
+                        : movies[index];
+                    return GestureDetector(
+                        onTap: () {
+                          // サムネイルタップ時に映画詳細を表示する処理
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      MovieDetail(movie: movie)));
+                        },
+                        child: movie.image != null
+                            ? Image.file(
+                                movie.image!,
+                                fit: BoxFit.cover,
+                              )
+                            : const Icon(Icons.image, size: 100));
+                  },
+                );
+        },
+      ),
     );
   }
 }

@@ -17,7 +17,7 @@ void main() {
         // 受け渡すデータを更新可能にするため、ChangeNotifierProviderを使用
         // 受け渡すデータとはMovieProvider内で定義される変数たち
         // MovieProviderがChangeNotifierを継承(or mixin)するのが条件
-        ChangeNotifierProvider(create: (_) => MovieProvider()),
+        ChangeNotifierProvider(create: (_) => MovieLogProvider()),
       ],
       // アプリの本体
       // MultiProviderに紐づいている
@@ -102,10 +102,9 @@ class HomeScreenState extends State<HomeScreen> {
           ),
           // 設定ボタン
           IconButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.push(
                 context,
-                // 遷移先の画面
                 MaterialPageRoute(
                   builder: (context) => const Settings(),
                 ),

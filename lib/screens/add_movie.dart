@@ -67,7 +67,7 @@ class MovieAdditionState extends State<MovieAddition> {
         image: _selectedImage,
         comment: comment,
         isFavorite: _isFavorite);
-    context.read<MovieProvider>().addMovieList(newMovie);
+    context.read<MovieLogProvider>().addMovieList(newMovie);
   }
 
   @override

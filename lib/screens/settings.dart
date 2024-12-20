@@ -1,50 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:movie_log/models/movie.dart';
+import 'package:provider/provider.dart';
 
-class Settings extends StatelessWidget {
+class Settings extends StatefulWidget {
   const Settings({super.key});
 
+  @override
+  SettingsState createState() => SettingsState();
+}
+
+class SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: ListView(
-        children: <Widget>[
-          ListTile(
-            leading: const Icon(Icons.account_circle),
-            title: const Text('Account'),
-            onTap: () {
-              // Navigate to account settings
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.notifications),
-            title: const Text('Notifications'),
-            onTap: () {
-              // Navigate to notification settings
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.lock),
-            title: const Text('Privacy'),
-            onTap: () {
-              // Navigate to privacy settings
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.help),
-            title: const Text('Help & Support'),
-            onTap: () {
-              // Navigate to help & support
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.info),
-            title: const Text('About'),
-            onTap: () {
-              // Navigate to about page
-            },
-          ),
-        ],
+      body: Consumer<MovieLogProvider>(
+        builder: (context, movieLogProvider, child) {
+          return ListView(
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.grid_on),
+                title: const Text('Number of Columns'),
+                subtitle: Slider(
+                  value: movieLogProvider.numColumns.toDouble(),
+                  min: 1,
+                  max: 5,
+                  divisions: 4,
+                  label: movieLogProvider.numColumns.toString(),
+                  onChanged: (double value) {
+                    movieLogProvider.changeNumColumns(value.toInt());
+                  },
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

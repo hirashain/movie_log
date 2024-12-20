@@ -14,13 +14,20 @@ class Movie {
       required this.isFavorite});
 }
 
-class MovieProvider with ChangeNotifier {
+class MovieLogProvider with ChangeNotifier {
+  int _numColumns = 3;
   final List<Movie> _movies = [];
 
+  int get numColumns => _numColumns;
   List<Movie> get movies => _movies;
 
   void addMovieList(Movie movie) {
     _movies.add(movie);
+    notifyListeners();
+  }
+
+  void changeNumColumns(int num) {
+    _numColumns = num;
     notifyListeners();
   }
 
