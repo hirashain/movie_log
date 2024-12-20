@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '.././models/movie.dart';
+import 'movie_detail.dart';
 
 class Movies extends StatelessWidget {
   const Movies({super.key});
@@ -30,6 +31,11 @@ class Movies extends StatelessWidget {
                   return GestureDetector(
                       onTap: () {
                         // サムネイルタップ時に映画詳細を表示する処理
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    MovieDetail(movie: movie)));
                       },
                       child: movie.image != null
                           ? Image.file(
