@@ -64,6 +64,8 @@ class HomeScreen extends StatefulWidget {
 // ホーム画面の状態を管理するStateオブジェクト
 class HomeScreenState extends State<HomeScreen> {
   bool _onlyFavorite = false;
+  String awsAccessKey = "アクセスキー";
+  String awsSecretKey = "シークレットキー";
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +83,8 @@ class HomeScreenState extends State<HomeScreen> {
                 context,
                 // 遷移先の画面
                 MaterialPageRoute(
-                  builder: (context) => const MovieAddition(),
+                  builder: (context) => MovieAddition(
+                      awsAccessKey: awsAccessKey, awsSecretKey: awsSecretKey),
                 ),
               );
             },
