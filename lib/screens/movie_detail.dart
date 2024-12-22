@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/movie.dart';
+import 'dart:io';
 
 class MovieDetail extends StatelessWidget {
   final Movie movie;
@@ -31,9 +32,9 @@ class MovieDetail extends StatelessWidget {
               ],
             ),
             // 画像表示
-            movie.image != null
+            movie.imagePath != ''
                 ? Image.file(
-                    movie.image!,
+                    File(movie.imagePath),
                     height: 300,
                     width: 225,
                     fit: BoxFit.cover,

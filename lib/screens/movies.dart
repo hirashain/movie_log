@@ -1,6 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '.././models/movie.dart';
+import '.././models/movie_log_provider.dart';
 import 'movie_detail.dart';
 
 class Movies extends StatefulWidget {
@@ -53,9 +55,9 @@ class MoviesState extends State<Movies> {
                                   builder: (context) =>
                                       MovieDetail(movie: movie)));
                         },
-                        child: movie.image != null
+                        child: movie.imagePath != ''
                             ? Image.file(
-                                movie.image!,
+                                File(movie.imagePath),
                                 fit: BoxFit.cover,
                               )
                             : const Icon(Icons.image, size: 100));

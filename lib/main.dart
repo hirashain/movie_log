@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:movie_log/screens/add_movie.dart';
 import 'package:movie_log/screens/settings.dart';
 import 'package:provider/provider.dart';
-import 'models/movie.dart';
+import 'models/movie_log_provider.dart';
 import 'screens/movies.dart';
 
 // flutter runすると、lib/main.dartのmain関数が最初に呼び出される

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:movie_log/models/movie.dart';
+import 'package:movie_log/models/movie_log_provider.dart';
 import 'package:provider/provider.dart';
 
 class Settings extends StatefulWidget {

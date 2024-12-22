@@ -41,6 +41,7 @@ dependencies:
   aws_dynamodb_api: ^2.0.0
   minio_new: ^1.0.2
   path: ^1.9.0
+  sqflite: ^2.4.1
 
 dev_dependencies:
   flutter_test:

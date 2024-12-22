@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:movie_log/main.dart';
 import 'package:movie_log/models/movie.dart';
+import 'package:movie_log/models/movie_log_provider.dart';
 
 class MovieAddition extends StatefulWidget {
   const MovieAddition({super.key});
@@ -16,7 +17,7 @@ class MovieAddition extends StatefulWidget {
 class MovieAdditionState extends State<MovieAddition> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _commentController = TextEditingController();
-  File? _selectedImage;
+  String _selectedImage = '';
   bool _isButtonEnabled = false;
   bool _isFavorite = false;
 
@@ -48,22 +49,40 @@ class MovieAdditionState extends State<MovieAddition> {
 
     if (pickedFile != null) {
       setState(() {
-        _selectedImage = File(pickedFile.path);
+        _selectedImage = pickedFile.path;
       });
     }
   }
 
-  void _addMovie(BuildContext context) {
+  void _saveMovieToDevice() async {
+    // データの追加
+    await _addMovie(context);
+
+    // ホーム画面に戻る
+    _moveToHomeScreen();
+  }
+
+  void _moveToHomeScreen() {
+    Navigator.pop(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const HomeScreen(),
+      ),
+    );
+  }
+
+  Future<void> _addMovie(BuildContext context) async {
     final String title = _titleController.text;
     final String comment = _commentController.text;
 
     final newMovie = Movie(
       title: title,
-      image: _selectedImage,
+      imagePath: _selectedImage,
       comment: comment,
       isFavorite: _isFavorite,
     );
-    context.read<MovieLogProvider>().addMovieList(newMovie);
+    await Provider.of<MovieLogProvider>(context, listen: false)
+        .addMovieList(newMovie);
   }
 
   @override
@@ -102,9 +121,9 @@ class MovieAdditionState extends State<MovieAddition> {
             const SizedBox(height: 8),
             GestureDetector(
               onTap: _pickImage,
-              child: _selectedImage != null
+              child: _selectedImage != ''
                   ? Image.file(
-                      _selectedImage!,
+                      File(_selectedImage),
                       height: 160,
                       width: 120,
                       fit: BoxFit.cover,
@@ -132,17 +151,7 @@ class MovieAdditionState extends State<MovieAddition> {
 
             // 完了ボタン
             ElevatedButton(
-                onPressed: _isButtonEnabled
-                    ? () {
-                        _addMovie(context);
-                        Navigator.pop(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HomeScreen(),
-                          ),
-                        );
-                      }
-                    : null,
+                onPressed: _isButtonEnabled ? _saveMovieToDevice : null,
                 child: const Icon(Icons.check))
           ],
         ));
