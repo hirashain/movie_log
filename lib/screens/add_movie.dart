@@ -2,19 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'package:aws_dynamodb_api/dynamodb-2012-08-10.dart';
-import 'package:minio_new/minio.dart';
-import 'package:flutter/services.dart';
-import 'package:path/path.dart';
 
 import 'package:movie_log/main.dart';
 import 'package:movie_log/models/movie.dart';
 
 class MovieAddition extends StatefulWidget {
-  final String awsAccessKey;
-  final String awsSecretKey;
-  const MovieAddition(
-      {super.key, required this.awsAccessKey, required this.awsSecretKey});
+  const MovieAddition({super.key});
 
   @override
   MovieAdditionState createState() => MovieAdditionState();
@@ -26,7 +19,6 @@ class MovieAdditionState extends State<MovieAddition> {
   File? _selectedImage;
   bool _isButtonEnabled = false;
   bool _isFavorite = false;
-  late Minio minio;
 
   // ウィジェットが作成されたときに一回だけ呼び出される
   @override
@@ -34,13 +26,6 @@ class MovieAdditionState extends State<MovieAddition> {
     super.initState();
     // 入力内容の監視
     _titleController.addListener(_updateButtonState);
-
-    // AWS S3操作用オブジェクト
-    minio = Minio(
-        endPoint: 's3-ap-northeast-1.amazonaws.com',
-        region: 'ap-northeast-1',
-        accessKey: widget.awsAccessKey,
-        secretKey: widget.awsSecretKey);
   }
 
   // ウィジェットが画面から削除されるたびに呼び出される
@@ -66,49 +51,6 @@ class MovieAdditionState extends State<MovieAddition> {
         _selectedImage = File(pickedFile.path);
       });
     }
-  }
-
-  void uploadMovieToAWS(Movie movie) async {
-    uploadImageToS3(movie);
-    saveMovieToDynamoDB(movie);
-  }
-
-  void uploadImageToS3(Movie movie) async {
-    final byteData = await rootBundle.load(movie.image!.path);
-    Stream<Uint8List> imageBytes = Stream.value(byteData.buffer
-        .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-
-    const String bucketName = "movielog-dev-images";
-    const String uuid = "uuid";
-    String imageObjectKey = '$uuid/${basename(movie.image!.path)}';
-    await minio.putObject(
-      bucketName,
-      imageObjectKey,
-      imageBytes,
-    );
-  }
-
-  void saveMovieToDynamoDB(Movie movie) async {
-    AwsClientCredentials credentials = AwsClientCredentials(
-        accessKey: widget.awsAccessKey, secretKey: widget.awsSecretKey);
-
-    final dynamoDb = DynamoDB(
-      region: 'ap-northeast-1',
-      credentials: credentials,
-    );
-
-    const tableName = 'movielog-dev-movies';
-    final item = {
-      'title': AttributeValue(s: movie.title),
-      'comment': AttributeValue(s: movie.comment ?? ''),
-      'imageObjectKey':
-          AttributeValue(s: 'uuid/${basename(movie.image!.path)}'),
-    };
-
-    await dynamoDb.putItem(
-      tableName: tableName,
-      item: item,
-    );
   }
 
   void _addMovie(BuildContext context) {
