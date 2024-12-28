@@ -50,7 +50,7 @@ class MovieLogProvider with ChangeNotifier {
       databasePath,
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE movies(id INTEGER PRIMARY KEY, title TEXT, imagePath TEXT, comment TEXT, isFavorite INTEGER)',
+          'CREATE TABLE movies(id TEXT PRIMARY KEY, title TEXT, imagePath TEXT, comment TEXT, isFavorite INTEGER)',
         );
       },
       version: 1,
