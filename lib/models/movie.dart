@@ -1,7 +1,7 @@
 class Movie {
-  final String title;
+  String title;
   final String imagePath;
-  final String? comment;
+  String? comment;
   final bool isFavorite;
 
   Movie(
