@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:uuid/uuid.dart';
 
 import 'package:movie_log/main.dart';
 import 'package:movie_log/models/movie.dart';
@@ -74,13 +75,14 @@ class MovieAdditionState extends State<MovieAddition> {
   Future<void> _addMovie(BuildContext context) async {
     final String title = _titleController.text;
     final String comment = _commentController.text;
+    final String uuid = const Uuid().v6();
 
     final newMovie = Movie(
         title: title,
         imagePath: _selectedImage,
         comment: comment,
         isFavorite: _isFavorite,
-        id: title.hashCode);
+        id: uuid);
     await Provider.of<MovieLogProvider>(context, listen: false)
         .addMovieList(newMovie);
   }

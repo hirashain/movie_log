@@ -3,7 +3,7 @@ class Movie {
   final String imagePath;
   String? comment;
   bool isFavorite;
-  final int id;
+  final String id;
 
   Movie(
       {required this.title,
