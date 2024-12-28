@@ -91,71 +91,76 @@ class MovieAdditionState extends State<MovieAddition> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _titleController,
-                    decoration: const InputDecoration(labelText: 'Title'),
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(
-                    _isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: _isFavorite ? Colors.red : Colors.grey,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _isFavorite = !_isFavorite;
-                    });
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // 画像
-            const Text('Images', style: TextStyle(fontSize: 16)),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: _pickImage,
-              child: _selectedImage != ''
-                  ? Image.file(
-                      File(_selectedImage),
-                      height: 160,
-                      width: 120,
-                      fit: BoxFit.cover,
-                    )
-                  : Container(
-                      height: 160,
-                      width: 120,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Center(
-                        child: Icon(Icons.add_circle),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _titleController,
+                        decoration: const InputDecoration(labelText: 'Title'),
                       ),
                     ),
-            ),
-            const SizedBox(height: 16),
+                    IconButton(
+                      icon: Icon(
+                        _isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: _isFavorite ? Colors.red : Colors.grey,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isFavorite = !_isFavorite;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
 
-            // 自由コメント
-            TextField(
-              controller: _commentController,
-              decoration: const InputDecoration(labelText: 'Comment'),
-            ),
-            const SizedBox(height: 16),
+                // 画像
+                const Text('Images', style: TextStyle(fontSize: 16)),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: _pickImage,
+                  child: _selectedImage != ''
+                      ? Image.file(
+                          File(_selectedImage),
+                          height: 160,
+                          width: 120,
+                          fit: BoxFit.cover,
+                        )
+                      : Container(
+                          height: 160,
+                          width: 120,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Center(
+                            child: Icon(Icons.add_circle),
+                          ),
+                        ),
+                ),
+                const SizedBox(height: 16),
 
-            // 完了ボタン
-            ElevatedButton(
-                onPressed: _isButtonEnabled ? _saveMovieToDevice : null,
-                child: const Icon(Icons.check))
-          ],
+                // 自由コメント
+                TextField(
+                  controller: _commentController,
+                  decoration: const InputDecoration(labelText: 'Comment'),
+                ),
+                const SizedBox(height: 16),
+
+                // 完了ボタン
+                ElevatedButton(
+                    onPressed: _isButtonEnabled ? _saveMovieToDevice : null,
+                    child: const Icon(Icons.check))
+              ],
+            ),
+          ),
         ));
   }
 }
