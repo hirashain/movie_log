@@ -2,16 +2,19 @@ class Movie {
   String title;
   final String imagePath;
   String? comment;
-  final bool isFavorite;
+  bool isFavorite;
+  final int id;
 
   Movie(
       {required this.title,
       required this.imagePath,
       this.comment,
-      required this.isFavorite});
+      required this.isFavorite,
+      required this.id});
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'title': title,
       'imagePath': imagePath,
       'comment': comment,
@@ -25,6 +28,7 @@ class Movie {
       imagePath: map['imagePath'],
       comment: map['comment'],
       isFavorite: map['isFavorite'] == 1,
+      id: map['id'],
     );
   }
 }

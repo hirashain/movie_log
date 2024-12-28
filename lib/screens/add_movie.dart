@@ -76,11 +76,11 @@ class MovieAdditionState extends State<MovieAddition> {
     final String comment = _commentController.text;
 
     final newMovie = Movie(
-      title: title,
-      imagePath: _selectedImage,
-      comment: comment,
-      isFavorite: _isFavorite,
-    );
+        title: title,
+        imagePath: _selectedImage,
+        comment: comment,
+        isFavorite: _isFavorite,
+        id: title.hashCode);
     await Provider.of<MovieLogProvider>(context, listen: false)
         .addMovieList(newMovie);
   }

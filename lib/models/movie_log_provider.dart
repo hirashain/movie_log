@@ -76,9 +76,24 @@ class MovieLogProvider with ChangeNotifier {
         imagePath: maps[i]['imagePath'],
         comment: maps[i]['comment'],
         isFavorite: maps[i]['isFavorite'] == 1,
+        id: maps[i]['id'],
       );
     });
     notifyListeners();
+  }
+
+  Future<void> updateMovie(Movie movie) async {
+    await _moviesDatabase.update(
+      'movies',
+      movie.toMap(),
+      where: 'id = ?',
+      whereArgs: [movie.id],
+    );
+    int index = _movies.indexWhere((m) => m.id == movie.id);
+    if (index != -1) {
+      _movies[index] = movie;
+      notifyListeners();
+    }
   }
 
   void changeNumColumns(int newNumColumns) {

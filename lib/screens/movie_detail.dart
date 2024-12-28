@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/movie.dart';
+import '../models/movie_log_provider.dart';
 import 'dart:io';
 
 class MovieDetail extends StatefulWidget {
@@ -14,40 +16,38 @@ class MovieDetail extends StatefulWidget {
 class MovieDetailState extends State<MovieDetail> {
   late TextEditingController _titleController;
   late TextEditingController _commentController;
+  late bool _isFavorite = false;
+  late MovieLogProvider _movieLogProvider;
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.movie.title);
     _commentController = TextEditingController(text: widget.movie.comment);
+    _isFavorite = widget.movie.isFavorite;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _movieLogProvider = Provider.of<MovieLogProvider>(context, listen: false);
   }
 
   @override
   void dispose() {
+    widget.movie.title = _titleController.text;
+    widget.movie.comment = _commentController.text;
+    widget.movie.isFavorite = _isFavorite;
+    _movieLogProvider.updateMovie(widget.movie);
     _titleController.dispose();
     _commentController.dispose();
     super.dispose();
   }
 
-  void _saveChanges() {
-    setState(() {
-      widget.movie.title = _titleController.text;
-      widget.movie.comment = _commentController.text;
-    });
-    Navigator.pop(context);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.save),
-              onPressed: _saveChanges,
-            ),
-          ],
-        ),
+        appBar: AppBar(),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -60,12 +60,17 @@ class MovieDetailState extends State<MovieDetail> {
                     style: const TextStyle(fontSize: 32.0),
                   ),
                 ),
-                Icon(
-                  widget.movie.isFavorite
-                      ? Icons.favorite
-                      : Icons.favorite_border,
-                  color: widget.movie.isFavorite ? Colors.red : Colors.grey,
-                  size: 40.0,
+                IconButton(
+                  icon: Icon(
+                    _isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: _isFavorite ? Colors.red : Colors.grey,
+                    size: 40,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isFavorite = !_isFavorite;
+                    });
+                  },
                 ),
                 const SizedBox(width: 30),
               ],
