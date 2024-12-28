@@ -48,51 +48,53 @@ class MovieDetailState extends State<MovieDetail> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _titleController,
-                    style: const TextStyle(fontSize: 32.0),
+        body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _titleController,
+                      style: const TextStyle(fontSize: 32.0),
+                    ),
                   ),
-                ),
-                IconButton(
-                  icon: Icon(
-                    _isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: _isFavorite ? Colors.red : Colors.grey,
-                    size: 40,
+                  IconButton(
+                    icon: Icon(
+                      _isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: _isFavorite ? Colors.red : Colors.grey,
+                      size: 40,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isFavorite = !_isFavorite;
+                      });
+                    },
                   ),
-                  onPressed: () {
-                    setState(() {
-                      _isFavorite = !_isFavorite;
-                    });
-                  },
-                ),
-                const SizedBox(width: 30),
-              ],
-            ),
-            // 画像表示
-            widget.movie.imagePath != ''
-                ? Image.file(
-                    File(widget.movie.imagePath),
-                    height: 300,
-                    width: 225,
-                    fit: BoxFit.cover,
-                  )
-                : const Icon(Icons.image, size: 100),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: _commentController,
-                style: const TextStyle(fontSize: 16.0),
-                maxLines: null,
+                  const SizedBox(width: 30),
+                ],
               ),
-            ),
-          ],
+              // 画像表示
+              widget.movie.imagePath != ''
+                  ? Image.file(
+                      File(widget.movie.imagePath),
+                      height: 300,
+                      width: 225,
+                      fit: BoxFit.cover,
+                    )
+                  : const Icon(Icons.image, size: 100),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: _commentController,
+                  style: const TextStyle(fontSize: 16.0),
+                  maxLines: null,
+                ),
+              ),
+            ],
+          ),
         ));
   }
 }
