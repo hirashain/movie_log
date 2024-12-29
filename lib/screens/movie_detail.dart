@@ -44,10 +44,23 @@ class MovieDetailState extends State<MovieDetail> {
     super.dispose();
   }
 
+  void _deleteMovie() {
+    _movieLogProvider = Provider.of<MovieLogProvider>(context, listen: false);
+    _movieLogProvider.deleteMovie(widget.movie.id);
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(),
+        appBar: AppBar(
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: _deleteMovie,
+            ),
+          ],
+        ),
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

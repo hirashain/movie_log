@@ -96,6 +96,16 @@ class MovieLogProvider with ChangeNotifier {
     }
   }
 
+  Future<void> deleteMovie(String id) async {
+    await _moviesDatabase.delete(
+      'movies',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    _movies.removeWhere((movie) => movie.id == id);
+    notifyListeners();
+  }
+
   void changeNumColumns(int newNumColumns) {
     _numColumns = newNumColumns;
     _userSettingsDatabase.update(
