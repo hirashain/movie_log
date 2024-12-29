@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:uuid/uuid.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'package:movie_log/main.dart';
 import 'package:movie_log/models/movie.dart';
@@ -55,12 +56,29 @@ class MovieAdditionState extends State<MovieAddition> {
     }
   }
 
-  void _saveMovieToDevice() async {
-    // データの追加
-    await _addMovie(context);
+  Future<void> _saveMovieToDevice() async {
+    // Save the image to the app's internal storage
+    final String imagePath = await _saveImageToInternalStorage();
 
-    // ホーム画面に戻る
+    // Check if the widget is still mounted before using the context
+    if (!mounted) return;
+
+    // Add the movie with the new image path
+    await _addMovie(imagePath);
+
+    // Move to the home screen
     _moveToHomeScreen();
+  }
+
+  Future<String> _saveImageToInternalStorage() async {
+    if (_selectedImage.isEmpty) return '';
+
+    final directory = await getApplicationDocumentsDirectory();
+    final String fileName = '${const Uuid().v4()}.png';
+    final String newPath = '${directory.path}/$fileName';
+    final File newImage = await File(_selectedImage).copy(newPath);
+
+    return newImage.path;
   }
 
   void _moveToHomeScreen() {
@@ -72,14 +90,14 @@ class MovieAdditionState extends State<MovieAddition> {
     );
   }
 
-  Future<void> _addMovie(BuildContext context) async {
+  Future<void> _addMovie(String imagePath) async {
     final String title = _titleController.text;
     final String comment = _commentController.text;
-    final String uuid = const Uuid().v6();
+    final String uuid = const Uuid().v4();
 
     final newMovie = Movie(
         title: title,
-        imagePath: _selectedImage,
+        imagePath: imagePath,
         comment: comment,
         isFavorite: _isFavorite,
         id: uuid);

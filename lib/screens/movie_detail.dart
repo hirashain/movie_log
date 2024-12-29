@@ -45,7 +45,15 @@ class MovieDetailState extends State<MovieDetail> {
   }
 
   void _deleteMovie() {
-    _movieLogProvider = Provider.of<MovieLogProvider>(context, listen: false);
+    // Delete the image file from internal storage
+    if (widget.movie.imagePath.isNotEmpty) {
+      final File imageFile = File(widget.movie.imagePath);
+      if (imageFile.existsSync()) {
+        imageFile.deleteSync();
+      }
+    }
+
+    // Delete the movie from the database
     _movieLogProvider.deleteMovie(widget.movie.id);
     Navigator.pop(context);
   }
