@@ -14,27 +14,33 @@ class SettingsState extends State<Settings> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: Consumer<MovieLogProvider>(
-        builder: (context, movieLogProvider, child) {
-          return ListView(
-            children: <Widget>[
-              ListTile(
-                leading: const Icon(Icons.grid_on),
-                title: const Text('Number of Columns'),
-                subtitle: Slider(
-                  value: movieLogProvider.numColumns.toDouble(),
-                  min: 1,
-                  max: 5,
-                  divisions: 4,
-                  label: movieLogProvider.numColumns.toString(),
-                  onChanged: (double value) {
-                    movieLogProvider.changeNumColumns(value.toInt());
-                  },
-                ),
-              ),
-            ],
-          );
-        },
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Consumer<MovieLogProvider>(
+            builder: (context, movieLogProvider, child) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  ListTile(
+                    leading: const Icon(Icons.grid_on),
+                    title: const Text('Number of Columns'),
+                    subtitle: Slider(
+                      value: movieLogProvider.numColumns.toDouble(),
+                      min: 1,
+                      max: 5,
+                      divisions: 4,
+                      label: movieLogProvider.numColumns.toString(),
+                      onChanged: (double value) {
+                        movieLogProvider.changeNumColumns(value.toInt());
+                      },
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
       ),
     );
   }
