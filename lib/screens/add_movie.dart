@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:uuid/uuid.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'package:movie_log/main.dart';
 import 'package:movie_log/models/movie.dart';
 import 'package:movie_log/models/movie_log_provider.dart';
 
@@ -91,12 +90,7 @@ class MovieAdditionState extends State<MovieAddition> {
   }
 
   void _moveToHomeScreen() {
-    Navigator.pop(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const HomeScreen(),
-      ),
-    );
+    Navigator.pop(context);
   }
 
   Future<void> _addMovie(String movieId, String imagePath) async {
