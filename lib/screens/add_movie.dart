@@ -57,25 +57,34 @@ class MovieAdditionState extends State<MovieAddition> {
   }
 
   Future<void> _saveMovieToDevice() async {
+    final String uuid = const Uuid().v4();
+
     // Save the image to the app's internal storage
-    final String imagePath = await _saveImageToInternalStorage();
+    final String imagePath = await _saveImageToInternalStorage(uuid);
 
     // Check if the widget is still mounted before using the context
     if (!mounted) return;
 
     // Add the movie with the new image path
-    await _addMovie(imagePath);
+    await _addMovie(uuid, imagePath);
 
     // Move to the home screen
     _moveToHomeScreen();
   }
 
-  Future<String> _saveImageToInternalStorage() async {
+  Future<String> _saveImageToInternalStorage(String movieId) async {
     if (_selectedImage.isEmpty) return '';
 
     final directory = await getApplicationDocumentsDirectory();
-    final String fileName = '${const Uuid().v4()}.png';
-    final String newPath = '${directory.path}/$fileName';
+    final String movieDirPath = '${directory.path}/$movieId';
+    final Directory movieDir = Directory(movieDirPath);
+
+    if (!movieDir.existsSync()) {
+      movieDir.createSync();
+    }
+
+    final String fileName = File(_selectedImage).path.split('/').last;
+    final String newPath = '$movieDirPath/$fileName';
     final File newImage = await File(_selectedImage).copy(newPath);
 
     return newImage.path;
@@ -90,17 +99,16 @@ class MovieAdditionState extends State<MovieAddition> {
     );
   }
 
-  Future<void> _addMovie(String imagePath) async {
+  Future<void> _addMovie(String movieId, String imagePath) async {
     final String title = _titleController.text;
     final String comment = _commentController.text;
-    final String uuid = const Uuid().v4();
 
     final newMovie = Movie(
         title: title,
         imagePath: imagePath,
         comment: comment,
         isFavorite: _isFavorite,
-        id: uuid);
+        id: movieId);
     await Provider.of<MovieLogProvider>(context, listen: false)
         .addMovieList(newMovie);
   }
