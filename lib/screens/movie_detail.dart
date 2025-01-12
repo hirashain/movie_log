@@ -50,18 +50,7 @@ class MovieDetailState extends State<MovieDetail> {
 
   // 削除ボタン押下時に呼ばれる関数
   void _deleteMovie() {
-    // 画像ファイルが存在する場合は削除
-    if (widget.movie.imagePath.isNotEmpty) {
-      final File imageFile = File(widget.movie.imagePath);
-      if (imageFile.existsSync()) {
-        imageFile.deleteSync();
-      }
-    }
-
-    // データベースから削除
-    _movieLogProvider.deleteMovie(widget.movie.id);
-
-    // 画面を閉じる
+    _movieLogProvider.deleteMovie(widget.movie);
     Navigator.pop(context);
   }
 
