@@ -35,17 +35,22 @@ class MovieDetailState extends State<MovieDetail> {
 
   @override
   void dispose() {
+    // Movieプロパティを更新
     widget.movie.title = _titleController.text;
     widget.movie.comment = _commentController.text;
     widget.movie.isFavorite = _isFavorite;
     _movieLogProvider.updateMovie(widget.movie);
+
+    // メモリ解放
     _titleController.dispose();
     _commentController.dispose();
+
     super.dispose();
   }
 
+  // 削除ボタン押下時に呼ばれる関数
   void _deleteMovie() {
-    // Delete the image file from internal storage
+    // 画像ファイルが存在する場合は削除
     if (widget.movie.imagePath.isNotEmpty) {
       final File imageFile = File(widget.movie.imagePath);
       if (imageFile.existsSync()) {
@@ -53,8 +58,10 @@ class MovieDetailState extends State<MovieDetail> {
       }
     }
 
-    // Delete the movie from the database
+    // データベースから削除
     _movieLogProvider.deleteMovie(widget.movie.id);
+
+    // 画面を閉じる
     Navigator.pop(context);
   }
 
@@ -76,12 +83,14 @@ class MovieDetailState extends State<MovieDetail> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  // 映画タイトル
                   Expanded(
                     child: TextField(
                       controller: _titleController,
                       style: const TextStyle(fontSize: 32.0),
                     ),
                   ),
+                  // お気に入りボタン
                   IconButton(
                     icon: Icon(
                       _isFavorite ? Icons.favorite : Icons.favorite_border,
@@ -97,7 +106,7 @@ class MovieDetailState extends State<MovieDetail> {
                   const SizedBox(width: 30),
                 ],
               ),
-              // 画像表示
+              // サムネ画像
               widget.movie.imagePath != ''
                   ? Image.file(
                       File(widget.movie.imagePath),
@@ -106,6 +115,7 @@ class MovieDetailState extends State<MovieDetail> {
                       fit: BoxFit.cover,
                     )
                   : const Icon(Icons.image, size: 100),
+              // コメント
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
