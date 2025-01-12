@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'movie.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class MovieLogProvider with ChangeNotifier {
   List<Movie> _movies = [];
@@ -113,16 +115,25 @@ class MovieLogProvider with ChangeNotifier {
     }
   }
 
-  // 映画情報を削除
-  Future<void> deleteMovie(String id) async {
+  Future<void> deleteMovie(Movie movie) async {
+    // Movieインスタンスに紐づいたディレクトリを削除
+    final directory = await getApplicationDocumentsDirectory();
+    final String movieDirPath = '${directory.path}/${movie.id}';
+    final Directory movieDir = Directory(movieDirPath);
+    if (movieDir.existsSync()) {
+      movieDir.deleteSync(recursive: true);
+    }
+
     // データベースから映画情報を削除
     await _moviesDatabase.delete(
       'movies',
       where: 'id = ?',
-      whereArgs: [id],
+      whereArgs: [movie.id],
     );
-    // メモリ上の映画情報リストからも削除
-    _movies.removeWhere((movie) => movie.id == id);
+
+    // メモリ上の映画情報リストから削除
+    _movies.removeWhere((m) => m.id == movie.id);
+
     notifyListeners();
   }
 
