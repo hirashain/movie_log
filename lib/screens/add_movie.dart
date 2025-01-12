@@ -120,12 +120,14 @@ class MovieAdditionState extends State<MovieAddition> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    // 映画タイトル入力フィールド
                     Expanded(
                       child: TextField(
                         controller: _titleController,
                         decoration: const InputDecoration(labelText: 'Title'),
                       ),
                     ),
+                    // お気に入りボタン
                     IconButton(
                       icon: Icon(
                         _isFavorite ? Icons.favorite : Icons.favorite_border,
@@ -141,7 +143,7 @@ class MovieAdditionState extends State<MovieAddition> {
                 ),
                 const SizedBox(height: 16),
 
-                // 画像
+                // サムネ画像
                 const Text('Images', style: TextStyle(fontSize: 16)),
                 const SizedBox(height: 8),
                 GestureDetector(

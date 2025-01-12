@@ -22,6 +22,7 @@ class SettingsState extends State<Settings> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
+                  // 映画一覧画面の表示列数
                   ListTile(
                     leading: const Icon(Icons.grid_on),
                     title: const Text('Number of Columns'),

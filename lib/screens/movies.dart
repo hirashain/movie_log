@@ -19,6 +19,7 @@ class MoviesState extends State<Movies> {
     return Scaffold(
       body: Consumer<MovieLogProvider>(
         builder: (context, movieLogProvider, child) {
+          // 登録済みの映画情報を取得
           final movies = movieLogProvider.movies;
           return movies.isEmpty
               ? const Center(
@@ -30,9 +31,12 @@ class MoviesState extends State<Movies> {
               : GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: movieLogProvider.numColumns,
-                    crossAxisSpacing: 0, // 列間のスペース
-                    mainAxisSpacing: 0, // 行間のスペース
-                    childAspectRatio: 0.75, // サムネイルのアスペクト比
+                    // 列間のスペース
+                    crossAxisSpacing: 0,
+                    // 行間のスペース
+                    mainAxisSpacing: 0,
+                    // 表示画像のアスペクト比(横/縦)
+                    childAspectRatio: 0.75,
                   ),
                   itemCount: widget.onlyFavorite
                       ? movies
@@ -48,7 +52,7 @@ class MoviesState extends State<Movies> {
                         : movies[index];
                     return GestureDetector(
                         onTap: () {
-                          // サムネイルタップ時に映画詳細を表示する処理
+                          // サムネイルタップ時に映画詳細画面に遷移
                           Navigator.push(
                               context,
                               MaterialPageRoute(
