@@ -58,12 +58,12 @@ class MovieLogProvider with ChangeNotifier {
 
     _moviesDatabase = await openDatabase(
       databasePath,
+      version: 1,
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE movies(id TEXT PRIMARY KEY, title TEXT, imagePath TEXT, comment TEXT, isFavorite INTEGER)',
+          'CREATE TABLE movies(id TEXT PRIMARY KEY, title TEXT, movieDirPath TEXT, thumbnailPath TEXT, comment TEXT, isFavorite INTEGER)',
         );
       },
-      version: 1,
     );
     await _loadMovies(_moviesDatabase);
   }
@@ -89,7 +89,8 @@ class MovieLogProvider with ChangeNotifier {
     _movies = List.generate(maps.length, (i) {
       return Movie(
         title: maps[i]['title'],
-        imagePath: maps[i]['imagePath'],
+        movieDirPath: maps[i]['movieDirPath'],
+        thumbnailPath: maps[i]['thumbnailPath'],
         comment: maps[i]['comment'],
         isFavorite: maps[i]['isFavorite'] == 1,
         id: maps[i]['id'],

@@ -59,9 +59,9 @@ class MoviesState extends State<Movies> {
                                   builder: (context) =>
                                       MovieDetail(movie: movie)));
                         },
-                        child: movie.imagePath != ''
+                        child: movie.thumbnailPath != ''
                             ? Image.file(
-                                File(movie.imagePath),
+                                File(movie.thumbnailPath),
                                 fit: BoxFit.cover,
                               )
                             : const Icon(Icons.image, size: 100));

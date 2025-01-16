@@ -96,9 +96,9 @@ class MovieDetailState extends State<MovieDetail> {
                 ],
               ),
               // サムネ画像
-              widget.movie.imagePath != ''
+              widget.movie.thumbnailPath != ''
                   ? Image.file(
-                      File(widget.movie.imagePath),
+                      File(widget.movie.thumbnailPath),
                       height: 300,
                       width: 225,
                       fit: BoxFit.cover,

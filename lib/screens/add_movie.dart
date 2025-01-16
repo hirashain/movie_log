@@ -56,55 +56,76 @@ class MovieAdditionState extends State<MovieAddition> {
   }
 
   Future<void> _saveMovieToDevice() async {
-    final String uuid = const Uuid().v4();
+    // 映画インスタンスを作成
+    Movie newMovie = await _makeNewMovie();
 
-    // Save the image to the app's internal storage
-    final String imagePath = await _saveImageToInternalStorage(uuid);
+    // 画像を保存
+    await _saveImageToInternalStorage(_selectedImage, newMovie.thumbnailPath);
 
-    // Check if the widget is still mounted before using the context
-    if (!mounted) return;
+    // マウントが解除されている場合、作成したディレクトリを削除してから処理を終了
+    if (!mounted) {
+      if (Directory(newMovie.movieDirPath).existsSync()) {
+        Directory(newMovie.movieDirPath).deleteSync(recursive: true);
+      }
+      return;
+    }
 
-    // Add the movie with the new image path
-    await _addMovie(uuid, imagePath);
+    // 映画情報を追加
+    await Provider.of<MovieLogProvider>(context, listen: false)
+        .addMovieList(newMovie);
 
-    // Move to the home screen
+    // ホーム画面に遷移
     _moveToHomeScreen();
   }
 
-  Future<String> _saveImageToInternalStorage(String movieId) async {
-    if (_selectedImage.isEmpty) return '';
+  Future<void> _saveImageToInternalStorage(
+      String orgImagePath, String newImagePath) async {
+    // 元画像パスの値が空(==画像が選択されていない)場合は何もしない
+    if (orgImagePath == '') return;
 
-    final directory = await getApplicationDocumentsDirectory();
-    final String movieDirPath = '${directory.path}/$movieId';
-    final Directory movieDir = Directory(movieDirPath);
-
+    // 画像の保存先ディレクトリが存在しない場合は作成
+    final Directory movieDir = Directory(newImagePath).parent;
     if (!movieDir.existsSync()) {
       movieDir.createSync();
     }
 
-    final String fileName = File(_selectedImage).path.split('/').last;
-    final String newPath = '$movieDirPath/$fileName';
-    final File newImage = await File(_selectedImage).copy(newPath);
+    // 画像をコピーして保存
+    await File(orgImagePath).copy(newImagePath);
 
-    return newImage.path;
+    return;
   }
 
   void _moveToHomeScreen() {
     Navigator.pop(context);
   }
 
-  Future<void> _addMovie(String movieId, String imagePath) async {
+  Future<Movie> _makeNewMovie() async {
+    // 映画を一意に識別するためのID
+    final String uuid = const Uuid().v4();
+
+    // 映画に紐づく画像を保存するディレクトリ
+    final directory = await getApplicationDocumentsDirectory();
+    final String movieDirPath = '${directory.path}/$uuid';
+
+    String thumbnailPath = '';
+    if (_selectedImage != '') {
+      final String imageUuid = const Uuid().v4();
+      final String imageExtension = File(_selectedImage).path.split('.').last;
+      thumbnailPath = '$movieDirPath/$imageUuid.$imageExtension';
+    }
+
     final String title = _titleController.text;
     final String comment = _commentController.text;
 
     final newMovie = Movie(
         title: title,
-        imagePath: imagePath,
+        movieDirPath: movieDirPath,
+        thumbnailPath: thumbnailPath,
         comment: comment,
         isFavorite: _isFavorite,
-        id: movieId);
-    await Provider.of<MovieLogProvider>(context, listen: false)
-        .addMovieList(newMovie);
+        id: uuid);
+
+    return newMovie;
   }
 
   @override
