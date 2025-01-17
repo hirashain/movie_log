@@ -18,19 +18,16 @@ class MovieAddition extends StatefulWidget {
 class MovieAdditionState extends State<MovieAddition> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _commentController = TextEditingController();
-  String _selectedImage = '';
+  List<String> _selectedImagePaths = [];
   bool _isButtonEnabled = false;
   bool _isFavorite = false;
 
-  // ウィジェットが作成されたときに一回だけ呼び出される
   @override
   void initState() {
     super.initState();
-    // 入力内容の監視
     _titleController.addListener(_updateButtonState);
   }
 
-  // ウィジェットが画面から削除されるたびに呼び出される
   @override
   void dispose() {
     _titleController.dispose();
@@ -43,26 +40,29 @@ class MovieAdditionState extends State<MovieAddition> {
     });
   }
 
-  Future<void> _pickImage() async {
+  Future<void> _pickImages() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? pickedFile =
-        await picker.pickImage(source: ImageSource.gallery);
+    final List<XFile> pickedFiles = await picker.pickMultiImage();
 
-    if (pickedFile != null) {
+    if (pickedFiles.isNotEmpty) {
       setState(() {
-        _selectedImage = pickedFile.path;
+        _selectedImagePaths = pickedFiles.map((file) => file.path).toList();
       });
     }
   }
 
   Future<void> _saveMovieToDevice() async {
-    // 映画インスタンスを作成
     Movie newMovie = await _makeNewMovie();
 
-    // 画像を保存
-    await _saveImageToInternalStorage(_selectedImage, newMovie.thumbnailPath);
+    final Directory movieDir = Directory(newMovie.movieDirPath);
+    if (!movieDir.existsSync()) {
+      movieDir.createSync();
+    }
 
-    // マウントが解除されている場合、作成したディレクトリを削除してから処理を終了
+    for (String imagePath in _selectedImagePaths) {
+      await _saveImageToInternalStorage(imagePath, newMovie.movieDirPath);
+    }
+
     if (!mounted) {
       if (Directory(newMovie.movieDirPath).existsSync()) {
         Directory(newMovie.movieDirPath).deleteSync(recursive: true);
@@ -70,29 +70,20 @@ class MovieAdditionState extends State<MovieAddition> {
       return;
     }
 
-    // 映画情報を追加
     await Provider.of<MovieLogProvider>(context, listen: false)
         .addMovieList(newMovie);
 
-    // ホーム画面に遷移
     _moveToHomeScreen();
   }
 
   Future<void> _saveImageToInternalStorage(
-      String orgImagePath, String newImagePath) async {
-    // 元画像パスの値が空(==画像が選択されていない)場合は何もしない
-    if (orgImagePath == '') return;
+      String orgImagePath, String movieDirPath) async {
+    if (orgImagePath.isEmpty) return;
 
-    // 画像の保存先ディレクトリが存在しない場合は作成
-    final Directory movieDir = Directory(newImagePath).parent;
-    if (!movieDir.existsSync()) {
-      movieDir.createSync();
-    }
-
-    // 画像をコピーして保存
-    await File(orgImagePath).copy(newImagePath);
-
-    return;
+    final String imgExt = orgImagePath.split('.').last;
+    final String fileName = '${const Uuid().v4()}.$imgExt';
+    final String newPath = '$movieDirPath/$fileName';
+    await File(orgImagePath).copy(newPath);
   }
 
   void _moveToHomeScreen() {
@@ -100,19 +91,9 @@ class MovieAdditionState extends State<MovieAddition> {
   }
 
   Future<Movie> _makeNewMovie() async {
-    // 映画を一意に識別するためのID
     final String uuid = const Uuid().v4();
-
-    // 映画に紐づく画像を保存するディレクトリ
     final directory = await getApplicationDocumentsDirectory();
     final String movieDirPath = '${directory.path}/$uuid';
-
-    String thumbnailPath = '';
-    if (_selectedImage != '') {
-      final String imageUuid = const Uuid().v4();
-      final String imageExtension = File(_selectedImage).path.split('.').last;
-      thumbnailPath = '$movieDirPath/$imageUuid.$imageExtension';
-    }
 
     final String title = _titleController.text;
     final String comment = _commentController.text;
@@ -120,7 +101,8 @@ class MovieAdditionState extends State<MovieAddition> {
     final newMovie = Movie(
         title: title,
         movieDirPath: movieDirPath,
-        thumbnailPath: thumbnailPath,
+        thumbnailPath:
+            _selectedImagePaths.isNotEmpty ? _selectedImagePaths[0] : '',
         comment: comment,
         isFavorite: _isFavorite,
         id: uuid);
@@ -141,14 +123,12 @@ class MovieAdditionState extends State<MovieAddition> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // 映画タイトル入力フィールド
                     Expanded(
                       child: TextField(
                         controller: _titleController,
                         decoration: const InputDecoration(labelText: 'Title'),
                       ),
                     ),
-                    // お気に入りボタン
                     IconButton(
                       icon: Icon(
                         _isFavorite ? Icons.favorite : Icons.favorite_border,
@@ -163,18 +143,28 @@ class MovieAdditionState extends State<MovieAddition> {
                   ],
                 ),
                 const SizedBox(height: 16),
-
-                // サムネ画像
                 const Text('Images', style: TextStyle(fontSize: 16)),
                 const SizedBox(height: 8),
                 GestureDetector(
-                  onTap: _pickImage,
-                  child: _selectedImage != ''
-                      ? Image.file(
-                          File(_selectedImage),
-                          height: 160,
-                          width: 120,
-                          fit: BoxFit.cover,
+                  onTap: _pickImages,
+                  child: _selectedImagePaths.isNotEmpty
+                      ? GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            crossAxisSpacing: 8.0,
+                            mainAxisSpacing: 8.0,
+                            childAspectRatio: 0.75,
+                          ),
+                          itemCount: _selectedImagePaths.length,
+                          itemBuilder: (context, index) {
+                            return Image.file(
+                              File(_selectedImagePaths[index]),
+                              fit: BoxFit.cover,
+                            );
+                          },
                         )
                       : Container(
                           height: 160,
@@ -189,15 +179,11 @@ class MovieAdditionState extends State<MovieAddition> {
                         ),
                 ),
                 const SizedBox(height: 16),
-
-                // 自由コメント
                 TextField(
                   controller: _commentController,
                   decoration: const InputDecoration(labelText: 'Comment'),
                 ),
                 const SizedBox(height: 16),
-
-                // 完了ボタン
                 ElevatedButton(
                     onPressed: _isButtonEnabled ? _saveMovieToDevice : null,
                     child: const Icon(Icons.check))
