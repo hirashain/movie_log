@@ -18,6 +18,7 @@ class MovieDetailState extends State<MovieDetail> {
   late TextEditingController _commentController;
   late bool _isFavorite = false;
   late MovieLogProvider _movieLogProvider;
+  List<String> _imagePaths = [];
 
   @override
   void initState() {
@@ -25,6 +26,20 @@ class MovieDetailState extends State<MovieDetail> {
     _titleController = TextEditingController(text: widget.movie.title);
     _commentController = TextEditingController(text: widget.movie.comment);
     _isFavorite = widget.movie.isFavorite;
+    _loadImagePaths();
+  }
+
+  void _loadImagePaths() {
+    final Directory movieDir = Directory(widget.movie.movieDirPath);
+    if (movieDir.existsSync()) {
+      setState(() {
+        _imagePaths = movieDir
+            .listSync()
+            .whereType<File>()
+            .map((item) => item.path)
+            .toList();
+      });
+    }
   }
 
   @override
@@ -104,6 +119,36 @@ class MovieDetailState extends State<MovieDetail> {
                       fit: BoxFit.cover,
                     )
                   : const Icon(Icons.image, size: 100),
+              // 画像一覧
+              const SizedBox(height: 24),
+              _imagePaths.isNotEmpty
+                  ? SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: _imagePaths.map((imagePath) {
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: Image.file(
+                              File(imagePath),
+                              height: 100,
+                              width: 75,
+                              fit: BoxFit.cover,
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    )
+                  : Container(
+                      height: 160,
+                      width: 120,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Center(
+                        child: Icon(Icons.add_circle),
+                      ),
+                    ),
               // コメント
               Padding(
                 padding: const EdgeInsets.all(8.0),
