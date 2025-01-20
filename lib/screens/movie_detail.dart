@@ -29,7 +29,6 @@ class MovieDetailState extends State<MovieDetail> {
     _commentController = TextEditingController(text: widget.movie.comment);
     _isFavorite = widget.movie.isFavorite;
     _loadImagePaths();
-    print("detail thumbnailPath: " + widget.movie.thumbnailPath);
   }
 
   void _loadImagePaths() {
@@ -81,6 +80,10 @@ class MovieDetailState extends State<MovieDetail> {
     }
     setState(() {
       _imagePaths.remove(imagePath);
+
+      if (widget.movie.thumbnailPath == imagePath) {
+        widget.movie.thumbnailPath = '';
+      }
     });
   }
 
@@ -185,10 +188,7 @@ class MovieDetailState extends State<MovieDetail> {
                       ),
                     ),
                     // 画像一覧
-                    ..._imagePaths
-                        .where((imagePath) =>
-                            imagePath != widget.movie.thumbnailPath)
-                        .map((imagePath) {
+                    ..._imagePaths.map((imagePath) {
                       return Stack(
                         children: [
                           Padding(
