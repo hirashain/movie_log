@@ -60,7 +60,7 @@ class MovieAdditionState extends State<MovieAddition> {
     }
 
     for (String imagePath in _selectedImagePaths) {
-      await _saveImageToInternalStorage(imagePath, newMovie.movieDirPath);
+      await _saveImageToInternalStorage(imagePath, newMovie);
     }
 
     if (!mounted) {
@@ -77,13 +77,17 @@ class MovieAdditionState extends State<MovieAddition> {
   }
 
   Future<void> _saveImageToInternalStorage(
-      String orgImagePath, String movieDirPath) async {
+      String orgImagePath, Movie movie) async {
     if (orgImagePath.isEmpty) return;
 
     final String imgExt = orgImagePath.split('.').last;
     final String fileName = '${const Uuid().v4()}.$imgExt';
-    final String newPath = '$movieDirPath/$fileName';
+    final String newPath = '${movie.movieDirPath}/$fileName';
     await File(orgImagePath).copy(newPath);
+
+    if (orgImagePath == movie.thumbnailPath) {
+      movie.thumbnailPath = newPath;
+    }
   }
 
   void _moveToHomeScreen() {

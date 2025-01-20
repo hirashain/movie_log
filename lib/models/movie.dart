@@ -1,7 +1,7 @@
 class Movie {
   String title;
   final String movieDirPath;
-  final String thumbnailPath;
+  String thumbnailPath;
   String? comment;
   bool isFavorite;
   final String id;

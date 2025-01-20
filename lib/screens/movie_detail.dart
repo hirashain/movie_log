@@ -29,6 +29,7 @@ class MovieDetailState extends State<MovieDetail> {
     _commentController = TextEditingController(text: widget.movie.comment);
     _isFavorite = widget.movie.isFavorite;
     _loadImagePaths();
+    print("detail thumbnailPath: " + widget.movie.thumbnailPath);
   }
 
   void _loadImagePaths() {
@@ -184,7 +185,10 @@ class MovieDetailState extends State<MovieDetail> {
                       ),
                     ),
                     // 画像一覧
-                    ..._imagePaths.map((imagePath) {
+                    ..._imagePaths
+                        .where((imagePath) =>
+                            imagePath != widget.movie.thumbnailPath)
+                        .map((imagePath) {
                       return Stack(
                         children: [
                           Padding(
