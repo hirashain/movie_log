@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../models/movie.dart';
 import '../models/movie_log_provider.dart';
 import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:uuid/uuid.dart';
 
 class MovieDetail extends StatefulWidget {
   final Movie movie;
@@ -40,6 +42,45 @@ class MovieDetailState extends State<MovieDetail> {
             .toList();
       });
     }
+  }
+
+  Future<void> _pickImages() async {
+    final ImagePicker picker = ImagePicker();
+    final List<XFile> pickedFiles = await picker.pickMultiImage();
+
+    if (pickedFiles.isNotEmpty) {
+      for (XFile pickedFile in pickedFiles) {
+        final String newPath =
+            await _saveImageToInternalStorage(pickedFile.path);
+        setState(() {
+          _imagePaths.add(newPath);
+        });
+      }
+    }
+  }
+
+  Future<String> _saveImageToInternalStorage(String orgImagePath) async {
+    final Directory movieDir = Directory(widget.movie.movieDirPath);
+    if (!movieDir.existsSync()) {
+      movieDir.createSync();
+    }
+
+    final String imgExt = orgImagePath.split('.').last;
+    final String fileName = '${const Uuid().v4()}.$imgExt';
+    final String newPath = '${movieDir.path}/$fileName';
+    await File(orgImagePath).copy(newPath);
+
+    return newPath;
+  }
+
+  void _deleteImage(String imagePath) {
+    final File imageFile = File(imagePath);
+    if (imageFile.existsSync()) {
+      imageFile.deleteSync();
+    }
+    setState(() {
+      _imagePaths.remove(imagePath);
+    });
   }
 
   @override
@@ -120,35 +161,54 @@ class MovieDetailState extends State<MovieDetail> {
                     )
                   : const Icon(Icons.image, size: 100),
               // 画像一覧
-              const SizedBox(height: 24),
-              _imagePaths.isNotEmpty
-                  ? SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: _imagePaths.map((imagePath) {
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8.0),
+              const SizedBox(height: 16),
+              const Text('Images', style: TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    // 画像追加ボタン
+                    GestureDetector(
+                      onTap: _pickImages,
+                      child: Container(
+                        height: 100,
+                        width: 75,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Center(
+                          child: Icon(Icons.add_circle),
+                        ),
+                      ),
+                    ),
+                    // 画像一覧
+                    ..._imagePaths.map((imagePath) {
+                      return Stack(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
                             child: Image.file(
                               File(imagePath),
                               height: 100,
                               width: 75,
                               fit: BoxFit.cover,
                             ),
-                          );
-                        }).toList(),
-                      ),
-                    )
-                  : Container(
-                      height: 160,
-                      width: 120,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Center(
-                        child: Icon(Icons.add_circle),
-                      ),
-                    ),
+                          ),
+                          Positioned(
+                            right: 0,
+                            child: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => _deleteImage(imagePath),
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
+                  ],
+                ),
+              ),
               // コメント
               Padding(
                 padding: const EdgeInsets.all(8.0),
