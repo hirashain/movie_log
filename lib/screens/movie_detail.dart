@@ -49,13 +49,21 @@ class MovieDetailState extends State<MovieDetail> {
 
     if (pickedFiles.isNotEmpty) {
       for (XFile pickedFile in pickedFiles) {
+        // 画像をアプリ内ストレージに保存
         if (!mounted) return;
         final String newPath =
             await Provider.of<MovieLogProvider>(context, listen: false)
                 .saveImageToInternalStorage(pickedFile.path, widget.movie);
+
+        // 画像パスをメモリ上に追加
         setState(() {
           _imagePaths.add(newPath);
         });
+      }
+
+      // サムネイルが未設定の場合は追加した画像をサムネイルに設定
+      if (widget.movie.thumbnailPath == '') {
+        widget.movie.thumbnailPath = _imagePaths[0];
       }
     }
   }
