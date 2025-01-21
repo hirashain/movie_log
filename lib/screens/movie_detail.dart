@@ -4,7 +4,6 @@ import '../models/movie.dart';
 import '../models/movie_log_provider.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'package:uuid/uuid.dart';
 
 class MovieDetail extends StatefulWidget {
   final Movie movie;
@@ -50,8 +49,10 @@ class MovieDetailState extends State<MovieDetail> {
 
     if (pickedFiles.isNotEmpty) {
       for (XFile pickedFile in pickedFiles) {
+        if (!mounted) return;
         final String newPath =
-            await _saveImageToInternalStorage(pickedFile.path);
+            await Provider.of<MovieLogProvider>(context, listen: false)
+                .saveImageToInternalStorage(pickedFile.path, widget.movie);
         setState(() {
           _imagePaths.add(newPath);
         });
@@ -59,28 +60,18 @@ class MovieDetailState extends State<MovieDetail> {
     }
   }
 
-  Future<String> _saveImageToInternalStorage(String orgImagePath) async {
-    final Directory movieDir = Directory(widget.movie.movieDirPath);
-    if (!movieDir.existsSync()) {
-      movieDir.createSync();
-    }
-
-    final String imgExt = orgImagePath.split('.').last;
-    final String fileName = '${const Uuid().v4()}.$imgExt';
-    final String newPath = '${movieDir.path}/$fileName';
-    await File(orgImagePath).copy(newPath);
-
-    return newPath;
-  }
-
   void _deleteImage(String imagePath) {
+    // アプリ内ストレージから画像ファイルを削除
     final File imageFile = File(imagePath);
     if (imageFile.existsSync()) {
       imageFile.deleteSync();
     }
+
     setState(() {
+      // メモリ上から画像パスを削除
       _imagePaths.remove(imagePath);
 
+      // サムネイルの場合はMovieプロパティも更新(DB上の更新は画面遷移時に実行される)
       if (widget.movie.thumbnailPath == imagePath) {
         widget.movie.thumbnailPath = '';
       }

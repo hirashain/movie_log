@@ -3,6 +3,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'movie.dart';
 import 'dart:io';
+import 'package:uuid/uuid.dart';
 import 'package:path_provider/path_provider.dart';
 
 class MovieLogProvider with ChangeNotifier {
@@ -148,5 +149,21 @@ class MovieLogProvider with ChangeNotifier {
       where: 'id = 1',
     );
     notifyListeners();
+  }
+
+  Future<String> saveImageToInternalStorage(
+      String orgImagePath, Movie movie) async {
+    if (orgImagePath.isEmpty) return '';
+
+    final String imgExt = orgImagePath.split('.').last;
+    final String fileName = '${const Uuid().v4()}.$imgExt';
+    final String newPath = '${movie.movieDirPath}/$fileName';
+    await File(orgImagePath).copy(newPath);
+
+    if (orgImagePath == movie.thumbnailPath) {
+      movie.thumbnailPath = newPath;
+    }
+
+    return newPath;
   }
 }
