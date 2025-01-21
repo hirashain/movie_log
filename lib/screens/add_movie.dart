@@ -59,12 +59,19 @@ class MovieAdditionState extends State<MovieAddition> {
       movieDir.createSync();
     }
 
+    // 選択された画像をアプリ内ストレージに保存(失敗の場合ディレクトリを削除)
     for (String imagePath in _selectedImagePaths) {
-      if (!mounted) return;
+      if (!mounted) {
+        if (Directory(newMovie.movieDirPath).existsSync()) {
+          Directory(newMovie.movieDirPath).deleteSync(recursive: true);
+        }
+        return;
+      }
       String _ = await Provider.of<MovieLogProvider>(context, listen: false)
           .saveImageToInternalStorage(imagePath, newMovie);
     }
 
+    // addMovieListでcontextを使うためmountedチェック
     if (!mounted) {
       if (Directory(newMovie.movieDirPath).existsSync()) {
         Directory(newMovie.movieDirPath).deleteSync(recursive: true);

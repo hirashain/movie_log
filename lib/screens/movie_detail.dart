@@ -90,6 +90,8 @@ class MovieDetailState extends State<MovieDetail> {
     widget.movie.title = _titleController.text;
     widget.movie.comment = _commentController.text;
     widget.movie.isFavorite = _isFavorite;
+
+    // データベースとメモリ上の映画情報を更新
     _movieLogProvider.updateMovie(widget.movie);
 
     // メモリ解放
