@@ -59,10 +59,19 @@ class MovieAdditionState extends State<MovieAddition> {
       movieDir.createSync();
     }
 
+    // 選択された画像をアプリ内ストレージに保存(失敗の場合ディレクトリを削除)
     for (String imagePath in _selectedImagePaths) {
-      await _saveImageToInternalStorage(imagePath, newMovie.movieDirPath);
+      if (!mounted) {
+        if (Directory(newMovie.movieDirPath).existsSync()) {
+          Directory(newMovie.movieDirPath).deleteSync(recursive: true);
+        }
+        return;
+      }
+      String _ = await Provider.of<MovieLogProvider>(context, listen: false)
+          .saveImageToInternalStorage(imagePath, newMovie);
     }
 
+    // addMovieListでcontextを使うためmountedチェック
     if (!mounted) {
       if (Directory(newMovie.movieDirPath).existsSync()) {
         Directory(newMovie.movieDirPath).deleteSync(recursive: true);
@@ -74,16 +83,6 @@ class MovieAdditionState extends State<MovieAddition> {
         .addMovieList(newMovie);
 
     _moveToHomeScreen();
-  }
-
-  Future<void> _saveImageToInternalStorage(
-      String orgImagePath, String movieDirPath) async {
-    if (orgImagePath.isEmpty) return;
-
-    final String imgExt = orgImagePath.split('.').last;
-    final String fileName = '${const Uuid().v4()}.$imgExt';
-    final String newPath = '$movieDirPath/$fileName';
-    await File(orgImagePath).copy(newPath);
   }
 
   void _moveToHomeScreen() {

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/movie.dart';
 import '../models/movie_log_provider.dart';
 import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class MovieDetail extends StatefulWidget {
   final Movie movie;
@@ -42,6 +43,49 @@ class MovieDetailState extends State<MovieDetail> {
     }
   }
 
+  Future<void> _pickImages() async {
+    final ImagePicker picker = ImagePicker();
+    final List<XFile> pickedFiles = await picker.pickMultiImage();
+
+    if (pickedFiles.isNotEmpty) {
+      for (XFile pickedFile in pickedFiles) {
+        // 画像をアプリ内ストレージに保存
+        if (!mounted) return;
+        final String newPath =
+            await Provider.of<MovieLogProvider>(context, listen: false)
+                .saveImageToInternalStorage(pickedFile.path, widget.movie);
+
+        // 画像パスをメモリ上に追加
+        setState(() {
+          _imagePaths.add(newPath);
+        });
+      }
+
+      // サムネイルが未設定の場合は追加した画像をサムネイルに設定
+      if (widget.movie.thumbnailPath == '') {
+        widget.movie.thumbnailPath = _imagePaths[0];
+      }
+    }
+  }
+
+  void _deleteImage(String imagePath) {
+    // アプリ内ストレージから画像ファイルを削除
+    final File imageFile = File(imagePath);
+    if (imageFile.existsSync()) {
+      imageFile.deleteSync();
+    }
+
+    setState(() {
+      // メモリ上から画像パスを削除
+      _imagePaths.remove(imagePath);
+
+      // サムネイルの場合はMovieプロパティも更新(DB上の更新は画面遷移時に実行される)
+      if (widget.movie.thumbnailPath == imagePath) {
+        widget.movie.thumbnailPath = '';
+      }
+    });
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -54,6 +98,8 @@ class MovieDetailState extends State<MovieDetail> {
     widget.movie.title = _titleController.text;
     widget.movie.comment = _commentController.text;
     widget.movie.isFavorite = _isFavorite;
+
+    // データベースとメモリ上の映画情報を更新
     _movieLogProvider.updateMovie(widget.movie);
 
     // メモリ解放
@@ -120,35 +166,54 @@ class MovieDetailState extends State<MovieDetail> {
                     )
                   : const Icon(Icons.image, size: 100),
               // 画像一覧
-              const SizedBox(height: 24),
-              _imagePaths.isNotEmpty
-                  ? SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: _imagePaths.map((imagePath) {
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8.0),
+              const SizedBox(height: 16),
+              const Text('Images', style: TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    // 画像追加ボタン
+                    GestureDetector(
+                      onTap: _pickImages,
+                      child: Container(
+                        height: 100,
+                        width: 75,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Center(
+                          child: Icon(Icons.add_circle),
+                        ),
+                      ),
+                    ),
+                    // 画像一覧
+                    ..._imagePaths.map((imagePath) {
+                      return Stack(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
                             child: Image.file(
                               File(imagePath),
                               height: 100,
                               width: 75,
                               fit: BoxFit.cover,
                             ),
-                          );
-                        }).toList(),
-                      ),
-                    )
-                  : Container(
-                      height: 160,
-                      width: 120,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Center(
-                        child: Icon(Icons.add_circle),
-                      ),
-                    ),
+                          ),
+                          Positioned(
+                            right: 0,
+                            child: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => _deleteImage(imagePath),
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
+                  ],
+                ),
+              ),
               // コメント
               Padding(
                 padding: const EdgeInsets.all(8.0),
