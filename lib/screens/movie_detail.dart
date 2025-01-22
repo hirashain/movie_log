@@ -86,6 +86,43 @@ class MovieDetailState extends State<MovieDetail> {
     });
   }
 
+  void _setThumbnail(String imagePath) {
+    setState(() {
+      widget.movie.thumbnailPath = imagePath;
+    });
+  }
+
+  void _showImageOptions(String imagePath) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.image),
+              title: const Text('Set as Thumbnail'),
+              onTap: () {
+                _setThumbnail(imagePath);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.delete,
+                color: Colors.red,
+              ),
+              title: const Text('Delete Image'),
+              onTap: () {
+                _deleteImage(imagePath);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -121,7 +158,7 @@ class MovieDetailState extends State<MovieDetail> {
         appBar: AppBar(
           actions: [
             IconButton(
-              icon: const Icon(Icons.delete),
+              icon: const Icon(Icons.delete, color: Colors.red),
               onPressed: _deleteMovie,
             ),
           ],
@@ -189,26 +226,21 @@ class MovieDetailState extends State<MovieDetail> {
                       ),
                     ),
                     // 画像一覧
-                    ..._imagePaths.map((imagePath) {
-                      return Stack(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8.0),
-                            child: Image.file(
-                              File(imagePath),
-                              height: 100,
-                              width: 75,
-                              fit: BoxFit.cover,
-                            ),
+                    ..._imagePaths
+                        .where((imagePath) =>
+                            imagePath != widget.movie.thumbnailPath)
+                        .map((imagePath) {
+                      return GestureDetector(
+                        onLongPress: () => _showImageOptions(imagePath),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Image.file(
+                            File(imagePath),
+                            height: 100,
+                            width: 75,
+                            fit: BoxFit.cover,
                           ),
-                          Positioned(
-                            right: 0,
-                            child: IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () => _deleteImage(imagePath),
-                            ),
-                          ),
-                        ],
+                        ),
                       );
                     }),
                   ],
