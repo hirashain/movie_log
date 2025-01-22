@@ -4,6 +4,9 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:uuid/uuid.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:movie_log/models/movie.dart';
 import 'package:movie_log/models/movie_log_provider.dart';
@@ -19,6 +22,7 @@ class MovieAdditionState extends State<MovieAddition> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _commentController = TextEditingController();
   List<String> _selectedImagePaths = [];
+  List<String> _webImageUrls = [];
   bool _isButtonEnabled = false;
   bool _isFavorite = false;
 
@@ -38,6 +42,26 @@ class MovieAdditionState extends State<MovieAddition> {
     setState(() {
       _isButtonEnabled = _titleController.text.isNotEmpty;
     });
+  }
+
+  Future<void> _fetchMoviePosters(String title) async {
+    if (title.isEmpty) return;
+
+    final apiKey = dotenv.env['TMDB_API_KEY'];
+    final response = await http.get(Uri.parse(
+        'https://api.themoviedb.org/3/search/movie?api_key=$apiKey&query=$title'));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final List results = data['results'];
+      setState(() {
+        _webImageUrls = results
+            .sublist(0, 3)
+            .map((movie) =>
+                'https://image.tmdb.org/t/p/w500${movie['poster_path']}')
+            .toList();
+      });
+    }
   }
 
   Future<void> _pickImages() async {
@@ -124,9 +148,11 @@ class MovieAdditionState extends State<MovieAddition> {
                   children: [
                     Expanded(
                       child: TextField(
-                        controller: _titleController,
-                        decoration: const InputDecoration(labelText: 'Title'),
-                      ),
+                          controller: _titleController,
+                          decoration: const InputDecoration(labelText: 'Title'),
+                          onEditingComplete: () {
+                            _fetchMoviePosters(_titleController.text);
+                          }),
                     ),
                     IconButton(
                       icon: Icon(
@@ -177,6 +203,36 @@ class MovieAdditionState extends State<MovieAddition> {
                           ),
                         ),
                 ),
+                const SizedBox(height: 16),
+                const Text('Web Images', style: TextStyle(fontSize: 16)),
+                const SizedBox(height: 8),
+                _webImageUrls.isNotEmpty
+                    ? GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 8.0,
+                          mainAxisSpacing: 8.0,
+                          childAspectRatio: 0.75,
+                        ),
+                        itemCount: _webImageUrls.length,
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedImagePaths.add(_webImageUrls[index]);
+                              });
+                            },
+                            child: Image.network(
+                              _webImageUrls[index],
+                              fit: BoxFit.cover,
+                            ),
+                          );
+                        },
+                      )
+                    : const SizedBox(height: 16),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _commentController,

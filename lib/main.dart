@@ -4,8 +4,10 @@ import 'package:movie_log/screens/settings.dart';
 import 'package:provider/provider.dart';
 import 'models/movie_log_provider.dart';
 import 'screens/movies.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+Future<void> main() async {
+  await dotenv.load(fileName: 'assets/.env');
   runApp(
     // 複数のプロバイダーを管理する
     // 今は一つだが、拡張性を考慮してマルチを使う
