@@ -7,7 +7,7 @@ import 'screens/movies.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
-  await dotenv.load(fileName: '.env');
+  await dotenv.load(fileName: 'assets/.env');
   runApp(
     // 複数のプロバイダーを管理する
     // 今は一つだが、拡張性を考慮してマルチを使う

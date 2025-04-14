@@ -5,7 +5,6 @@ import 'movie.dart';
 import 'dart:io';
 import 'package:uuid/uuid.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:http/http.dart' as http;
 
 class MovieLogProvider with ChangeNotifier {
   List<Movie> _movies = [];
@@ -156,23 +155,10 @@ class MovieLogProvider with ChangeNotifier {
       String orgImagePath, Movie movie) async {
     if (orgImagePath.isEmpty) return '';
 
-    final Directory movieDir = Directory(movie.movieDirPath);
-    if (!movieDir.existsSync()) {
-      movieDir.createSync();
-    }
-
     final String imgExt = orgImagePath.split('.').last;
     final String fileName = '${const Uuid().v4()}.$imgExt';
-    final String newPath = '${movieDir.path}/$fileName';
-
-    if (orgImagePath.startsWith('http')) {
-      // Download the image from the URL
-      final response = await http.get(Uri.parse(orgImagePath));
-      final File file = File(newPath);
-      await file.writeAsBytes(response.bodyBytes);
-    } else {
-      await File(orgImagePath).copy(newPath);
-    }
+    final String newPath = '${movie.movieDirPath}/$fileName';
+    await File(orgImagePath).copy(newPath);
 
     if (orgImagePath == movie.thumbnailPath) {
       movie.thumbnailPath = newPath;

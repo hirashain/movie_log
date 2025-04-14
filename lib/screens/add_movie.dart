@@ -4,9 +4,6 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:uuid/uuid.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 import 'package:movie_log/models/movie.dart';
 import 'package:movie_log/models/movie_log_provider.dart';
@@ -22,7 +19,6 @@ class MovieAdditionState extends State<MovieAddition> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _commentController = TextEditingController();
   List<String> _selectedImagePaths = [];
-  List<String> _webImageUrls = [];
   bool _isButtonEnabled = false;
   bool _isFavorite = false;
 
@@ -50,59 +46,9 @@ class MovieAdditionState extends State<MovieAddition> {
 
     if (pickedFiles.isNotEmpty) {
       setState(() {
-        _selectedImagePaths
-            .addAll(pickedFiles.map((file) => file.path).toList());
+        _selectedImagePaths = pickedFiles.map((file) => file.path).toList();
       });
     }
-  }
-
-  Future<void> _fetchMoviePosters(String title) async {
-    if (title.isEmpty) return;
-
-    final apiKey = dotenv.env['TMDB_API_KEY'];
-    final response = await http.get(Uri.parse(
-        'https://api.themoviedb.org/3/search/movie?api_key=$apiKey&query=$title'));
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final List results = data['results'];
-      setState(() {
-        _webImageUrls = results
-            .sublist(0, 3)
-            .map((movie) =>
-                'https://image.tmdb.org/t/p/w500${movie['poster_path']}')
-            .toList();
-        _selectedImagePaths.addAll(_webImageUrls);
-      });
-    }
-  }
-
-  void _showImageSourceOptions() {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Add from Device'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickImages();
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.movie),
-              title: const Text('Add from TMDB'),
-              onTap: () {
-                Navigator.pop(context);
-                _fetchMoviePosters(_titleController.text);
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   Future<void> _saveMovieToDevice() async {
@@ -198,49 +144,38 @@ class MovieAdditionState extends State<MovieAddition> {
                 const SizedBox(height: 16),
                 const Text('Images', style: TextStyle(fontSize: 16)),
                 const SizedBox(height: 8),
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: _showImageSourceOptions,
-                      child: Container(
-                        height: 160,
-                        width: 120,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Center(
-                          child: Icon(Icons.add_circle),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: _selectedImagePaths.map((imagePath) {
-                            return Padding(
-                              padding: const EdgeInsets.only(left: 8.0),
-                              child: imagePath.startsWith('http')
-                                  ? Image.network(
-                                      imagePath,
-                                      height: 160,
-                                      width: 120,
-                                      fit: BoxFit.cover,
-                                    )
-                                  : Image.file(
-                                      File(imagePath),
-                                      height: 160,
-                                      width: 120,
-                                      fit: BoxFit.cover,
-                                    ),
+                GestureDetector(
+                  onTap: _pickImages,
+                  child: _selectedImagePaths.isNotEmpty
+                      ? GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            crossAxisSpacing: 8.0,
+                            mainAxisSpacing: 8.0,
+                            childAspectRatio: 0.75,
+                          ),
+                          itemCount: _selectedImagePaths.length,
+                          itemBuilder: (context, index) {
+                            return Image.file(
+                              File(_selectedImagePaths[index]),
+                              fit: BoxFit.cover,
                             );
-                          }).toList(),
+                          },
+                        )
+                      : Container(
+                          height: 160,
+                          width: 120,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Center(
+                            child: Icon(Icons.add_circle),
+                          ),
                         ),
-                      ),
-                    ),
-                  ],
                 ),
                 const SizedBox(height: 16),
                 TextField(
